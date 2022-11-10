@@ -1,0 +1,293 @@
+import javax.swing.*;  
+import java.awt.event.*;  
+
+class ScrollBarExample  
+{  
+ScrollBarExample(){  
+    JFrame f= new JFrame("Scrollbar Example");  
+    final JLabel label = new JLabel();          
+    label.setHorizontalAlignment(JLabel.CENTER);    
+    label.setSize(400,100);  
+    final JScrollBar s=new JScrollBar();  
+    s.setBounds(100,100, 50,100);  
+    f.add(s); 
+    f.add(label);  
+    f.setSize(400,400);  
+    f.setLayout(null);  
+    f.setVisible(true);  
+    s.addAdjustmentListener(new AdjustmentListener() {  
+    public void adjustmentValueChanged(AdjustmentEvent e) {  
+    label.setText("Vertical Scrollbar value is:"+ s.getValue());  
+    }  
+  });
+}  
+
+
+public static void main(String args[])  
+{  
+   new ScrollBarExample();  
+}}
+-----------------------------------------
+import javax.swing.*;    
+public class RadioButtonExample {    
+JFrame f;    
+RadioButtonExample(){    
+f=new JFrame();     
+JRadioButton r1=new JRadioButton("A) Male");    
+JRadioButton r2=new JRadioButton("B) Female");    
+r1.setBounds(75,50,100,30);    
+r2.setBounds(75,100,100,30);    
+ButtonGroup bg=new ButtonGroup();    
+bg.add(r1);bg.add(r2);    
+f.add(r1);f.add(r2);      
+f.setSize(300,300);    
+f.setLayout(null);    
+f.setVisible(true);    
+}    
+public static void main(String[] args) {    
+    new RadioButtonExample();    
+}    
+}
+-------------------------------------------
+import javax.swing.JFrame;
+import javax.swing.JButton;
+import java.awt.FlowLayout;
+class Buttonss extends JFrame
+{
+// JButtonclass,,,,bvariable is an object
+static JButton b;
+//create a constructor
+Buttonss() 
+{
+this.setSize(600,500);
+this.setTitle("AI & DS");
+this.setLayout(null);
+// checks first Buttons class ..if it is not present in this class 
+//then check JFrame class
+//creating a object and the reference we are assigning to b
+b=new JButton("Click Me");
+//b.setBounds(x,y,height, width);
+b.setBounds(200,200,200,60);
+this.add(b);
+this.setVisible(true); 
+}
+public static void main(String[] args)
+{
+new Buttonss();
+}
+}
+-------------------------------------------
+import javax.swing.*;  
+public class CheckBoxExample  
+{  
+     CheckBoxExample(){  
+        JFrame f= new JFrame("CheckBox Example");  
+        JCheckBox checkBox1 = new JCheckBox("C++");  
+        checkBox1.setBounds(100,100, 50,50);  
+        JCheckBox checkBox2 = new JCheckBox("Java", true);  
+        checkBox2.setBounds(100,150, 50,50);  
+        f.add(checkBox1);  
+        f.add(checkBox2);  
+        f.setSize(400,400);  
+        f.setLayout(null);  
+        f.setVisible(true);  
+     }  
+public static void main(String args[])  
+    {  
+    new CheckBoxExample();  
+    }}  
+ ------------------------------------------
+ // java Program to create a simple JList
+import java.awt.event.*;
+import java.awt.*;
+import javax.swing.*;
+class solve extends JFrame
+{
+     
+    //frame
+    static JFrame f;
+     
+    //lists
+    static JList b;
+  
+ 
+    //main class
+    public static void main(String[] args)
+    {
+        //create a new frame
+        f = new JFrame("frame");
+         
+        //create a object
+        solve s=new solve();
+       
+        //create a panel
+        JPanel p =new JPanel();
+         
+        //create a new label
+        JLabel l= new JLabel("select the day of the week");
+ 
+        //String array to store weekdays
+        String week[]= { "Monday","Tuesday","Wednesday",
+                         "Thursday","Friday","Saturday","Sunday"};
+         
+        //create list
+        b= new JList(week);
+         
+        //set a selected index
+        b.setSelectedIndex(2);
+         
+        //add list to panel
+        p.add(b);
+  
+        f.add(p);
+         
+        //set the size of frame
+        f.setSize(400,400);
+          
+        f.show();
+    }
+}
+-------------------------------------------
+// importing awt class  
+import java.awt.*;   
+public class ChoiceExample1 {    
+  
+         // class constructor  
+        ChoiceExample1() {    
+  
+        // creating a frame  
+        Frame f = new Frame();    
+  
+        // creating a choice component  
+        Choice c = new Choice();   
+  
+        // setting the bounds of choice menu   
+        c.setBounds(100, 100, 75, 75);    
+  
+        // adding items to the choice menu  
+        c.add("Item 1");    
+        c.add("Item 2");    
+        c.add("Item 3");    
+        c.add("Item 4");    
+        c.add("Item 5");    
+  
+        // adding choice menu to frame  
+        f.add(c);    
+  
+        // setting size, layout and visibility of frame  
+        f.setSize(400, 400);    
+        f.setLayout(null);    
+        f.setVisible(true);    
+     }    
+  
+// main method  
+public static void main(String args[])    
+{    
+   new ChoiceExample1();    
+}    
+}   
+------------------------------------------------
+import javax.swing.*;    
+import java.awt.event.*;    
+public class MenuExample implements ActionListener{    
+JFrame f;    
+JMenuBar mb;    
+JMenu file,edit,help;    
+JMenuItem cut,copy,paste,selectAll;    
+JTextArea ta;    
+MenuExample(){    
+f=new JFrame();    
+cut=new JMenuItem("cut");    
+copy=new JMenuItem("copy");    
+paste=new JMenuItem("paste");    
+selectAll=new JMenuItem("selectAll");    
+cut.addActionListener(this);    
+copy.addActionListener(this);    
+paste.addActionListener(this);    
+selectAll.addActionListener(this);    
+mb=new JMenuBar();    
+file=new JMenu("File");    
+edit=new JMenu("Edit");    
+help=new JMenu("Help");     
+edit.add(cut);edit.add(copy);edit.add(paste);edit.add(selectAll);    
+mb.add(file);mb.add(edit);mb.add(help);    
+ta=new JTextArea();    
+ta.setBounds(5,5,360,320);    
+f.add(mb);f.add(ta);    
+f.setJMenuBar(mb);  
+f.setLayout(null);    
+f.setSize(400,400);    
+f.setVisible(true);    
+}     
+public void actionPerformed(ActionEvent e) {    
+if(e.getSource()==cut)    
+ta.cut();    
+if(e.getSource()==paste)    
+ta.paste();    
+if(e.getSource()==copy)    
+ta.copy();    
+if(e.getSource()==selectAll)    
+ta.selectAll();    
+}     
+public static void main(String[] args) {    
+    new MenuExample();    
+}    
+}    
+--------------------------------------------
+// java Program to create a simple JDialog
+import java.awt.event.*;
+import java.awt.*;
+import javax.swing.*;
+class solve extends JFrame implements ActionListener {
+ 
+    // frame
+    static JFrame f;
+ 
+    // main class
+    public static void main(String[] args)
+    {
+        // create a new frame
+        f = new JFrame("frame");
+ 
+        // create a object
+        solve s = new solve();
+ 
+        // create a panel
+        JPanel p = new JPanel();
+ 
+        JButton b = new JButton("click");
+ 
+        // add actionlistener to button
+        b.addActionListener(s);
+ 
+        // add button to panel
+        p.add(b);
+ 
+        f.add(p);
+ 
+        // set the size of frame
+        f.setSize(400, 400);
+ 
+        f.show();
+    }
+    public void actionPerformed(ActionEvent e)
+    {
+        String s = e.getActionCommand();
+        if (s.equals("click")) {
+            // create a dialog Box
+            JDialog d = new JDialog(f, "dialog Box");
+ 
+            // create a label
+            JLabel l = new JLabel("this is a dialog box");
+ 
+            d.add(l);
+ 
+            // setsize of dialog
+            d.setSize(100, 100);
+ 
+            // set visibility of dialog
+            d.setVisible(true);
+        }
+    }
+}
+-----------------------------------------
