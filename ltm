@@ -145,3 +145,33 @@ a = mat1[69].toarray()[0]
 ind = (-a).argsort()
 movies.iloc[ind[:20]]
 -------------------------------------------------
+import pandas as pd
+import numpy as np
+from sklearn import datasets
+import cv2 as cv
+data = datasets.load_digits()
+X = data["data"]
+Y = data["target"]
+corr = np.cov(X.T)
+val, v = np.linalg.eig(corr)
+val
+v
+PCA_data = pd.DataFrame()
+for i in range(len(v)):
+    feat = np.dot(X - np.mean(X), v[i])
+    PCA_data["PCA" + str(i)] = feat
+PCA_data
+var = []
+for i in range(len(vec)):
+    var += [np.var(PCA_data["PCA" + str(i)])]
+var = np.array(var)
+var = var / np.sum(var)
+var
+temp = zip(var, list(range(len(vec))))
+temp = sorted(temp, reverse = True)
+var, indices = zip(*temp)
+indices = np.array(indices)
+var = np.array(var)
+indices = indices[np.cumsum(var) <= 0.9]
+PCA_data.iloc[:,indices]
+-----------------------------------------------------------
