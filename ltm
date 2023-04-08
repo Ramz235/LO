@@ -1,0 +1,86 @@
+------------------------------------------------------------------------
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras import layers
+# Model / data parameters
+num_classes = 10
+input_shape = (28, 28, 1)
+# Load the data and split it between train and test sets
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+# convert class vectors to binary class matrices
+y_train = keras.utils.to_categorical(y_train, num_classes)
+y_test = keras.utils.to_categorical(y_test, num_classes)
+model = keras.Sequential([keras.Input(shape=input_shape),
+                          layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+                          layers.MaxPooling2D(pool_size=(2, 2)),
+                          layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+                          layers.MaxPooling2D(pool_size=(2, 2)),
+                          layers.Flatten(),layers.Dropout(0.5),
+                          layers.Dense(num_classes, activation="softmax"),])
+model.summary()
+model.compile(loss="categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
+model.fit(x_train, y_train, batch_size=128, epochs=15, validation_split=0.1)
+score = model.evaluate(x_test, y_test, verbose=0)
+print("Test loss:", score[0])
+print("Test accuracy:", score[1])
+print(score)
+--------------------------------------------------------------------------
+import torch
+import numpy as np
+import pandas as pd
+data = pd.read_csv(r"/content/Bank_Personal_Loan_Modelling.csv")
+data.head()
+data.info()
+data.drop(['Age','ID','ZIP Code'],axis=1,inplace=True)
+from sklearn.model_selection import train_test_split as tts
+xtr,xtst,ytr,ytst = tts(data.drop(['CreditCard'],axis=1),data['CreditCard'],test_size=0.25)
+xtr.shape,xtst.shape,ytr.shape,ytst.shape
+xtr = torch.tensor(xtr.values, dtype=torch.float32)
+xtst = torch.tensor(xtst.values, dtype=torch.float32)
+ytr = torch.tensor(ytr.values, dtype=torch.float32).reshape(-1,1)
+ytst = torch.tensor(ytst.values, dtype=torch.float32).reshape(-1,1)
+class Model(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear1 = torch.nn.Linear(10, 16)
+        self.act1 = torch.nn.ReLU()
+        self.linear2 = torch.nn.Linear(16, 8)
+        self.act2 = torch.nn.ReLU()
+        self.linear3 = torch.nn.Linear(8,1)
+        self.sigmoid = torch.nn.Sigmoid()
+    def forward(self, x):
+        x = self.linear1(x)
+        x = self.act1(x)
+        x = self.linear2(x)
+        x = self.act2(x)
+        x = self.linear3(x)
+        x = self.sigmoid(x)
+        return x
+epochs = 1000
+model = Model()
+loss_fn = torch.nn.BCELoss(weight = torch.tensor([0.8]))
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+with torch.inference_mode():
+      test_pred = model(xtst)
+ans1 = (test_pred>0.5).float()
+loss_fn(ytst,test_pred)
+from sklearn.metrics import confusion_matrix,classification_report
+confusion_matrix(ans1,ytst)
+print(classification_report(ans1,ytst))
+print(classification_report(ans1,ytst))
+-------------------------------------------------------------------------
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+model = Sequential()
+model.add(Dense(16, input_shape=(10,), activation='relu'))
+model.add(Dense(8, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
+model.summary()
+from sklearn.model_selection import train_test_split as tts
+xtr,xtst,ytr,ytst = tts(data.drop(['CreditCard'],axis=1),data['CreditCard'],test_size=0.25)
+model.fit(xtr,ytr,epochs=100)
+ans = (model.predict(xtst)>0.5).astype(int)
+confusion_matrix(ans,ytst)
+print(classification_report(ans,ytst))
+-------------------------------------------------------------------------------------------
