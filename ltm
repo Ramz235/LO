@@ -84,3 +84,64 @@ ans = (model.predict(xtst)>0.5).astype(int)
 confusion_matrix(ans,ytst)
 print(classification_report(ans,ytst))
 -------------------------------------------------------------------------------------------
+import pandas as pd
+import numpy as np
+from scipy import sparse
+movies = pd.read_csv(r"Netflix_Dataset_Movie.csv")
+ratings = pd.read_csv(r"Netflix_Dataset_Rating.csv")
+movies.head()
+ratings.head()
+ratings['User'] = ratings['User_ID'].astype('category').cat.codes
+ratings['Movie'] = ratings['Movie_ID'].astype('category').cat.codes
+ratings['Rating'] = ratings['Rating'].transform( lambda x: x-3 if x!=0 else 0)
+ratings.head()
+mat = sparse.coo_matrix((ratings['Rating'], (ratings['User'],ratings['Movie'])))
+mat1 = mat.tocsr()
+def jacsim(user):
+    col = mat1[user].toarray().flatten()
+    
+    a = (col!=0).astype(int)
+    b = (mat1!=0).astype(int)
+    sim_users = a@b.T
+    
+    s1 = np.array(np.sum(b,axis=1)).flatten()
+    s2 = np.sum(a)
+
+    sim_users = sim_users/(s1 +s2 -sim_users)
+    ind = (-sim_users).argsort()
+    
+    return ind
+    jacsim(75)[:10]
+    def cossim(user):
+    col = mat1[user].toarray()[0]
+    
+    sim = col@mat1.T
+    a = np.array(np.sum(mat1.power(2),axis=1)).flatten()
+    b = np.sum(col**2)
+    
+    sim = sim/((a**0.5)*(b**0.5))
+    ind = (-sim).argsort()
+    
+    return ind
+    cossim(75)[:10]
+    def recommend(user,number_of_movies=5):
+    u1 = jacsim(user)[1]
+    u2 = cossim(user)[1]
+    
+    col = mat1[user].toarray()[0]
+    a = mat1[u1].toarray()[0]
+    print("jaccard similarity",u1)
+    a = a*(col==0)
+    ind = (-a).argsort()
+    print(movies.iloc[ind[:5]])
+    
+    b = mat1[u2].toarray()[0]
+    print("cosine similarity",u2)
+    b = b*(col==0)
+    ind = (-b).argsort()
+    print(movies.iloc[ind[:5]])
+    recommend(69)
+a = mat1[69].toarray()[0]
+ind = (-a).argsort()
+movies.iloc[ind[:20]]
+-------------------------------------------------
