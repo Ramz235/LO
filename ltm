@@ -175,3 +175,29 @@ var = np.array(var)
 indices = indices[np.cumsum(var) <= 0.9]
 PCA_data.iloc[:,indices]
 -----------------------------------------------------------
+from sklearn.datasets import load_iris
+import pandas as pd
+df = load_iris()
+df.data = pd.DataFrame(df.data)
+data = df.data.iloc[:,[0,1,2]].values
+data
+from sklearn.cluster import KMeans
+wcss = []
+for i in range(2,11):
+    km = KMeans(n_clusters = i,random_state = 0)
+    km.fit(data)
+    wcss.append(km.inertia_)
+    import matplotlib.pyplot as plt
+plt.plot(range(2,11),wcss)
+km = KMeans(n_clusters = 4,random_state = 0)
+y = km.fit_predict(data)
+print(y)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection = '3d')
+ax.scatter(data[y==0,0],data[y==0,1],data[y==0,2],c = 'red')
+ax.scatter(data[y==1,0],data[y==1,1],data[y==1,2],c = 'blue')
+ax.scatter(data[y==2,0],data[y==2,1],data[y==2,2],c = 'yellow')
+ax.scatter(data[y==3,0],data[y==3,1],data[y==3,2],c = 'black')
+ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], km.cluster_centers_[:,2], s = 100, c = 'green')
+plt.show()
+----------------------------------------------------------------------------------------------------------------------
