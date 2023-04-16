@@ -1,203 +1,173 @@
-------------------------------------------------------------------------
+----------------------------------------------------------------
 import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers
-# Model / data parameters
-num_classes = 10
-input_shape = (28, 28, 1)
-# Load the data and split it between train and test sets
-(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
-# convert class vectors to binary class matrices
-y_train = keras.utils.to_categorical(y_train, num_classes)
-y_test = keras.utils.to_categorical(y_test, num_classes)
-model = keras.Sequential([keras.Input(shape=input_shape),
-                          layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
-                          layers.MaxPooling2D(pool_size=(2, 2)),
-                          layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
-                          layers.MaxPooling2D(pool_size=(2, 2)),
-                          layers.Flatten(),layers.Dropout(0.5),
-                          layers.Dense(num_classes, activation="softmax"),])
-model.summary()
-model.compile(loss="categorical_crossentropy",optimizer="adam",metrics=["accuracy"])
-model.fit(x_train, y_train, batch_size=128, epochs=15, validation_split=0.1)
-score = model.evaluate(x_test, y_test, verbose=0)
-print("Test loss:", score[0])
-print("Test accuracy:", score[1])
-print(score)
---------------------------------------------------------------------------
-import torch
-import numpy as np
-import pandas as pd
-data = pd.read_csv(r"/content/Bank_Personal_Loan_Modelling.csv")
-data.head()
-data.info()
-data.drop(['Age','ID','ZIP Code'],axis=1,inplace=True)
-from sklearn.model_selection import train_test_split as tts
-xtr,xtst,ytr,ytst = tts(data.drop(['CreditCard'],axis=1),data['CreditCard'],test_size=0.25)
-xtr.shape,xtst.shape,ytr.shape,ytst.shape
-xtr = torch.tensor(xtr.values, dtype=torch.float32)
-xtst = torch.tensor(xtst.values, dtype=torch.float32)
-ytr = torch.tensor(ytr.values, dtype=torch.float32).reshape(-1,1)
-ytst = torch.tensor(ytst.values, dtype=torch.float32).reshape(-1,1)
-class Model(torch.nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.linear1 = torch.nn.Linear(10, 16)
-        self.act1 = torch.nn.ReLU()
-        self.linear2 = torch.nn.Linear(16, 8)
-        self.act2 = torch.nn.ReLU()
-        self.linear3 = torch.nn.Linear(8,1)
-        self.sigmoid = torch.nn.Sigmoid()
-    def forward(self, x):
-        x = self.linear1(x)
-        x = self.act1(x)
-        x = self.linear2(x)
-        x = self.act2(x)
-        x = self.linear3(x)
-        x = self.sigmoid(x)
-        return x
-epochs = 1000
-model = Model()
-loss_fn = torch.nn.BCELoss(weight = torch.tensor([0.8]))
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-with torch.inference_mode():
-      test_pred = model(xtst)
-ans1 = (test_pred>0.5).float()
-loss_fn(ytst,test_pred)
-from sklearn.metrics import confusion_matrix,classification_report
-confusion_matrix(ans1,ytst)
-print(classification_report(ans1,ytst))
-print(classification_report(ans1,ytst))
--------------------------------------------------------------------------
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-model = Sequential()
-model.add(Dense(16, input_shape=(10,), activation='relu'))
-model.add(Dense(8, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
-model.compile(loss='binary_crossentropy',optimizer='adam',metrics=['accuracy'])
-model.summary()
-from sklearn.model_selection import train_test_split as tts
-xtr,xtst,ytr,ytst = tts(data.drop(['CreditCard'],axis=1),data['CreditCard'],test_size=0.25)
-model.fit(xtr,ytr,epochs=100)
-ans = (model.predict(xtst)>0.5).astype(int)
-confusion_matrix(ans,ytst)
-print(classification_report(ans,ytst))
--------------------------------------------------------------------------------------------
-import pandas as pd
-import numpy as np
-from scipy import sparse
-movies = pd.read_csv(r"Netflix_Dataset_Movie.csv")
-ratings = pd.read_csv(r"Netflix_Dataset_Rating.csv")
-movies.head()
-ratings.head()
-ratings['User'] = ratings['User_ID'].astype('category').cat.codes
-ratings['Movie'] = ratings['Movie_ID'].astype('category').cat.codes
-ratings['Rating'] = ratings['Rating'].transform( lambda x: x-3 if x!=0 else 0)
-ratings.head()
-mat = sparse.coo_matrix((ratings['Rating'], (ratings['User'],ratings['Movie'])))
-mat1 = mat.tocsr()
-def jacsim(user):
-    col = mat1[user].toarray().flatten()
-    
-    a = (col!=0).astype(int)
-    b = (mat1!=0).astype(int)
-    sim_users = a@b.T
-    
-    s1 = np.array(np.sum(b,axis=1)).flatten()
-    s2 = np.sum(a)
+import sklearn.datasets
+import tensorflow as tf
 
-    sim_users = sim_users/(s1 +s2 -sim_users)
-    ind = (-sim_users).argsort()
-    
-    return ind
-    jacsim(75)[:10]
-    def cossim(user):
-    col = mat1[user].toarray()[0]
-    
-    sim = col@mat1.T
-    a = np.array(np.sum(mat1.power(2),axis=1)).flatten()
-    b = np.sum(col**2)
-    
-    sim = sim/((a**0.5)*(b**0.5))
-    ind = (-sim).argsort()
-    
-    return ind
-    cossim(75)[:10]
-    def recommend(user,number_of_movies=5):
-    u1 = jacsim(user)[1]
-    u2 = cossim(user)[1]
-    
-    col = mat1[user].toarray()[0]
-    a = mat1[u1].toarray()[0]
-    print("jaccard similarity",u1)
-    a = a*(col==0)
-    ind = (-a).argsort()
-    print(movies.iloc[ind[:5]])
-    
-    b = mat1[u2].toarray()[0]
-    print("cosine similarity",u2)
-    b = b*(col==0)
-    ind = (-b).argsort()
-    print(movies.iloc[ind[:5]])
-    recommend(69)
-a = mat1[69].toarray()[0]
-ind = (-a).argsort()
-movies.iloc[ind[:20]]
--------------------------------------------------
+from sklearn.metrics import accuracy_score 
+from tensorflow.keras.losses import mean_squared_error
+
+(x_train,y_train),(x_test,y_test)=tf.keras.datasets.mnist.load_data()
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+
+x_train=x_train.reshape(60000,784)
+x_test=x_test.reshape(10000,784)
+x_train=sc.fit_transform(x_train)
+x_test=sc.transform(x_test)
+
 import pandas as pd
+
+y_train1 = pd.DataFrame(y_train).astype('str')
+
+y_train1 = pd.get_dummies(y_train1)
+
+y_train1
+
+y_train1 = y_train1.to_numpy(int)
+
+y_train1
+
+def ReLU(x):
+    return np.maximum(0,x)
+
+def ReLU_derivative(x):
+    return np.where(x>0,1,0)
+
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+    
+# def gradientclip(x):
+    # return np.where(np.where(x<-10,1,x)>10,1,x)
+    
+class NeuralNetwork:
+    def __init__(self,input_size,hidden1_Size,hidden2_size,hidden3_size,output_size):
+        #(hidden_layer1)
+        self.w1= np.random.random((input_size,hidden1_Size)) *0.1 - 0.05
+        self.b1= np.zeros((hidden1_Size)) 
+
+        #(hidden layer2)      
+        self.w2=np.random.random((hidden1_Size,hidden2_size)) *0.1 - 0.05
+        self.b2=np.zeros((hidden2_size))
+
+        #(hidden layer3)
+        self.w3 =np.random.random((hidden2_size,hidden3_size)) *0.1 - 0.05
+        self.b3 =np.zeros((hidden3_size))
+
+        #(output_layer)
+        self.w4 =np.random.random((hidden3_size,output_size)) *0.1 - 0.05
+        self.b4 =np.zeros((output_size))
+
+    
+    def forward(self,x):
+        self.x1=np.dot(x,self.w1) + self.b1
+        self.y1=ReLU(self.x1) #output of hidden_layer1
+        self.x2=np.dot(self.y1,self.w2) + self.b2
+        self.y2=ReLU(self.x2)
+        self.x3=np.dot(self.y2,self.w3) + self.b3
+        self.y3=ReLU(self.x3)
+        self.x4=np.dot(self.y3,self.w4) + self.b4
+        self.o=tf.nn.softmax(self.x4)
+        #print(self.o.numpy())
+
+        return self.o.numpy()
+
+    def backward(self,o,x,y,alpha):
+        output_delta = (y-o) * 0.01
+        #print(output_delta)
+        hidden3_error = output_delta.dot(self.w4.T)
+        hidden3_delta=hidden3_error*(ReLU_derivative(self.y3))
+        #print(hidden3_delta)
+        hidden2_error = hidden3_delta.dot(self.w3.T)
+        hidden2_delta= hidden2_error*(ReLU_derivative(self.y2))
+        hidden1_error = hidden2_delta.dot(self.w2.T)
+        hidden1_delta = hidden1_error*(ReLU_derivative(self.y1))
+
+        self.w4+=(self.y3.T.dot(output_delta)*alpha)
+        self.w3+=(self.y2.T.dot(hidden3_delta)*alpha)
+        self.w2+=(self.y1.T.dot(hidden2_delta)*alpha)
+        self.w1+=(x.reshape(1,784).T.dot(hidden1_delta)*alpha)
+
+        self.b4+=(np.sum(output_delta,0)*alpha)/y.shape[0]
+        self.b3+=(np.sum(hidden3_delta,0)*alpha)/y.shape[0]
+        self.b2+=(np.sum(hidden2_delta,0)*alpha)/y.shape[0]
+        self.b1+=(np.sum(hidden1_delta,0)*alpha)/y.shape[0]
+
+        #print('bias:',self.y1.T.dot(hidden2_delta)*alpha)
+
+    def train(self,x,y_t,y,alpha,epoch):
+        LOSS=np.zeros(epoch,'float64')
+        ACCURACY=np.zeros(epoch,'float64')
+        for j in range(epoch):
+            for i in range(len(x)):
+                o = self.forward(x[i].reshape(1,784))
+                self.backward(o,x[i],y_t[i].reshape(1,10),alpha)
+            
+            ot=self.forward(x)
+            LOSS[j]=np.sum(mean_squared_error(y_t,ot))
+            ACCURACY[j]=accuracy_score(y,np.argmax(ot,axis=1))
+            print('epoch:',j,'loss:',LOSS[j],'accuracy:',ACCURACY[j])
+    
+    def predict(self,x):
+        o = self.forward(x)
+        return np.argmax(o,axis=1)
+
+nn=NeuralNetwork(784,32,25,16,10)
+
+nn.train(x_train,y_train1,y_train,0.05,10)
+
+nn.train(x_train,y_train1,y_train,0.1,20)
+
+accuracy_score(y_test,nn.predict(x_test))
+
+nn.predict(x_test)
+
+--------------------------------------------------------------------------------
+
 import numpy as np
-from sklearn import datasets
-import cv2 as cv
-data = datasets.load_digits()
+
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
+
+class LogReg:
+    def __init__(self, dimensions):
+        self.weights = np.random.random(dimensions + 1) * 0.0001
+        
+    def forward(self, X):
+        X = np.concatenate((X, np.ones((X.shape[0],1))), axis = 1)
+        return sigmoid(np.dot(X, self.weights))
+    
+    def backpropagate(self, X, Y):
+        pred = self.forward(X)
+        X = np.concatenate((X, np.ones((X.shape[0],1))), axis = 1)
+        error = pred - Y
+        dw = 0.001 * np.dot(X.T, error)
+        self.weights -= dw
+        
+ lr = LogReg(30)
+ 
+ 
+ from sklearn.datasets import load_breast_cancer
+data = load_breast_cancer()
+
 X = data["data"]
 Y = data["target"]
-corr = np.cov(X.T)
-val, v = np.linalg.eig(corr)
-val
-v
-PCA_data = pd.DataFrame()
-for i in range(len(v)):
-    feat = np.dot(X - np.mean(X), v[i])
-    PCA_data["PCA" + str(i)] = feat
-PCA_data
-var = []
-for i in range(len(vec)):
-    var += [np.var(PCA_data["PCA" + str(i)])]
-var = np.array(var)
-var = var / np.sum(var)
-var
-temp = zip(var, list(range(len(vec))))
-temp = sorted(temp, reverse = True)
-var, indices = zip(*temp)
-indices = np.array(indices)
-var = np.array(var)
-indices = indices[np.cumsum(var) <= 0.9]
-PCA_data.iloc[:,indices]
------------------------------------------------------------
-from sklearn.datasets import load_iris
-import pandas as pd
-df = load_iris()
-df.data = pd.DataFrame(df.data)
-data = df.data.iloc[:,[0,1,2]].values
-data
-from sklearn.cluster import KMeans
-wcss = []
-for i in range(2,11):
-    km = KMeans(n_clusters = i,random_state = 0)
-    km.fit(data)
-    wcss.append(km.inertia_)
-    import matplotlib.pyplot as plt
-plt.plot(range(2,11),wcss)
-km = KMeans(n_clusters = 4,random_state = 0)
-y = km.fit_predict(data)
-print(y)
-fig = plt.figure()
-ax = fig.add_subplot(111, projection = '3d')
-ax.scatter(data[y==0,0],data[y==0,1],data[y==0,2],c = 'red')
-ax.scatter(data[y==1,0],data[y==1,1],data[y==1,2],c = 'blue')
-ax.scatter(data[y==2,0],data[y==2,1],data[y==2,2],c = 'yellow')
-ax.scatter(data[y==3,0],data[y==3,1],data[y==3,2],c = 'black')
-ax.scatter(km.cluster_centers_[:,0], km.cluster_centers_[:,1], km.cluster_centers_[:,2], s = 100, c = 'green')
-plt.show()
-----------------------------------------------------------------------------------------------------------------------
+
+from sklearn.preprocessing import StandardScaler
+
+sc = StandardScaler()
+X = sc.fit_transform(X)
+
+for i in range(100):
+    lr.backpropagate(X, Y)
+
+pred = lr.forward(X)
+
+pred
+
+from sklearn.metrics import accuracy_score
+
+accuracy_score(np.round(pred), Y)
+
+---------------------------------------------------------------------------------
